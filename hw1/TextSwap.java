@@ -16,8 +16,13 @@ public class TextSwap {
     }
 
     private static Interval[] getIntervals(int numChunks, int chunkSize) {
-        // TODO: Implement me!
-        return null;
+        Interval[] intervals = new Interval[numChunks];
+        int start = 0;
+        for (int i = 0; i < numChunks; i++) {
+            start = i * chunkSize;
+            intervals[i] = new Interval(start, (start + chunkSize));
+        }
+        return intervals;
     }
 
     private static List<Character> getLabels(int numChunks) {
@@ -33,15 +38,41 @@ public class TextSwap {
         return labels;
     }
 
+    private static void reorderIntervals(Interval[] intervals, List<Character> labels) {
+        for (int i = 0; i < intervals.length; i++) {
+            Interval startInterval = intervals[i];
+            int j = i;
+            while (true) {
+                int k = labels.get(j) - 'a';
+                labels.set(j, (char) ('a' + j));
+                if (k == i) {
+                    break;
+                }
+                intervals[j] = intervals[k];
+                j = k;
+            }
+            intervals[j] = startInterval;
+        }
+    }
+
     private static char[] runSwapper(String content, int chunkSize, int numChunks) {
         List<Character> labels = getLabels(numChunks);
         Interval[] intervals = getIntervals(numChunks, chunkSize);
-        // TODO: Order the intervals properly, then run the Swapper instances.
-        return null;
+        char[] buffer = new char[chunkSize * numChunks];
+
+        reorderIntervals(intervals, labels);
+
+        // Run the swapper threads
+        for (int i = 0; i < intervals.length; i++) {
+            Swapper s = new Swapper(intervals[i], content, buffer, i * chunkSize);
+            s.run();
+        }
+
+        return buffer;
     }
 
     private static void writeToFile(String contents, int chunkSize, int numChunks) throws Exception {
-        char[] buff = runSwapper(contents, chunkSize, contents.length() / chunkSize);
+        char[] buff = runSwapper(contents, chunkSize, numChunks);
         PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
         writer.print(buff);
         writer.close();
@@ -52,11 +83,27 @@ public class TextSwap {
             System.out.println("Usage: java TextSwap <chunk size> <filename>");
             return;
         }
+
         String contents = "";
         int chunkSize = Integer.parseInt(args[0]);
+        int numChunks;
+
         try {
             contents = readFile(args[1]);
-            writeToFile(contents, chunkSize, contents.length() / chunkSize);
+            numChunks = contents.length() / chunkSize;
+
+            if (numChunks > 26) {
+                System.err.println("Chunk size too small.");
+                return;
+            }
+
+            if (numChunks <= 0 || contents.length() % chunkSize != 0) {
+                System.err.println("Chunk size must be positive and file sizemust be a multiple of the chunk size");
+                return;
+            }
+
+            writeToFile(contents, chunkSize, numChunks);
+
         } catch (Exception e) {
             System.out.println("Error with IO.");
             return;
