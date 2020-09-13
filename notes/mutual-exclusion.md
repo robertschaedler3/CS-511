@@ -41,3 +41,18 @@ Once thread `T1` starts doing something, it needs to *“race”* to finish it b
 
 This is hard to detect and there can be race conditions in programs that satisfy LCR.
 
+## Critical Section
+
+
+> **Critical Section**: A  part  of  the  program  that  accesses  shared  memory  and  which  wewish to execute atomically
+
+> **The Mutual Exclusion Problem**
+> 
+> Guarantee that:
+> 1.  `Mutex`:  At any point in time, there is at most one thread inthe critical section
+> 2.  `Absence of livelock`:  If various threads try to enter the criticalsection, at least one of them will succeed
+> 3.  `Free from starvation`:  A thread trying to enter its criticalsection will eventually be able to do so
+
+### Reasonable Assumptions of MEP
+
+
