@@ -27,5 +27,3 @@ A **Transition System** *A* is a tuple (*S*, &#8594;, *I*) where *S* is the set 
 > *A* is said to be finite if *S* is finite. 
 
 > We write s &#8594; s' for (s, s') &#8712; &#8594;
-
-
