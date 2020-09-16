@@ -87,7 +87,52 @@ while (cond) {} → await !cond
 
 We will assume that `await` is atomic, for this an all subsequent programs. For most of our examples this makes no difference since it satisfies the LCR property.
 
-> <img src="./mutual-exclusion.png" style="width:500px;">
+### Attempt I
+
+> <img src="./mep-code-1.png" style="width:400px;">
 
 
-Can gaurentee MEP holds because there will never be a state `(P4, Q4, ?)` in the transition system. 
+Can gaurentee MEP holds because there will never be a state `(P4, Q4, ?)` in the transition system. This also enjoys absence of livelock, but not freedom from starvation. 
+
+### Attempt I: Transition System
+
+> <img src="./mep-transition-system-1.png" style="width:400px;">
+
+This is becasue if thread P goes into an infinite loop/throws an exception it will never complete and set the value of turn to 2 causeing thread Q to never run.
+
+### Attempt II
+
+> <img src="./mep-code-2.png" style="width:400px;">
+
+In this case, mutual exclusion does not hold since both threads can enter the critical section.
+
+### Attempt III
+
+> <img src="./mep-code-3.png" style="width:400px;">
+
+This solution enjoys mutual exclusion and freedom from starvation, however it does not avoid livelock.
+
+> **Contention**
+>
+> - **Naive back-out**: either back out if they discover they are contending with the other
+> - **Dekker’s algorithm**: take turns
+> - **Peterson’s algorithm**: give priority to the first one that wanted access
+
+### Attempt IV - Naive back-out
+ 
+> <img src="./mep-code-4.png" style="width:400px;">
+
+This solution enjoys mutual exclusion and absence of livelock however, it is not free from starvation since there is an interleaving where P can enter and exit the critical section but Q will repeatedly try and fail. 
+
+### Dekker's algorithm (1965) - Combines attempts I & IV
+ 
+`Right to insist on entering` is passed between the two processes.
+
+> <img src="./mep-code-5.png" style="width:400px;">
+
+
+### Peterson's algorithm - (1981)
+
+Similar to Dekker except that if both want access, priority is givento the first one that wanted to access.
+ 
+> <img src="./mep-code-6.png" style="width:400px;">
