@@ -9,7 +9,7 @@
 - **Completed**: Execution is finished.
 - **Blocked**: A process needs access to some resource that is not currently available.
 
-> <img src="./states-of-a-process.png" style="width:400px;">
+> <img src="./img/semaphores-1/states-of-a-process.png" style="width:400px;">
 
 ## What is a semaphore?
 
@@ -23,11 +23,11 @@ A sepaphore is an Abstract Data Type with:
 
 ### Aquire
 
-> <img src="./aquire.png" style="width:400px;">
+> <img src="./img/semaphores-1/aquire.png" style="width:400px;">
 
 ### Release
 
-> <img src="./release.png" style="width:400px;">
+> <img src="./img/semaphores-1/release.png" style="width:400px;">
 
 ## Mutual Exclusion Using Semaphores
 
@@ -36,7 +36,7 @@ The MEP for two processes becomes trivial if we use a `mutex`.
 - Entry protocol: `mutex.aquire();`
 - Exit protocol: `mutex.release();`
 
-> <img src="./mep-mutex.png" style="width:400px;">
+> <img src="./img/semaphores-1/mep-mutex.png" style="width:400px;">
 
 This solution does not use busy waiting: a process that blocks in the acquire goes into the `BLOCKED` state and only returns to the `READY` state once it is given permission to do so.
 
