@@ -8,6 +8,6 @@ Specific atomic operations are provided by hardware to allow a fixed number of i
 
 ## Test and Set
 
-> <img src="./img/complex-atomic-actions/test-and-set.png" style="width:400px;">
+> <img src="./img/03complex-atomic-options/test-and-set.png" style="width:400px;">
 
 
