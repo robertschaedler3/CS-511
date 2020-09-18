@@ -55,7 +55,7 @@ public class TextSwap {
         }
     }
 
-    private static char[] runSwapper(String content, int chunkSize, int numChunks) {
+    private static char[] runSwapper(String content, int chunkSize, int numChunks) throws InterruptedException {
         List<Character> labels = getLabels(numChunks);
         Interval[] intervals = getIntervals(numChunks, chunkSize);
         char[] buffer = new char[chunkSize * numChunks];
@@ -65,7 +65,9 @@ public class TextSwap {
         // Run the swapper threads
         for (int i = 0; i < intervals.length; i++) {
             Swapper s = new Swapper(intervals[i], content, buffer, i * chunkSize);
-            s.run();
+            Thread t = new Thread(s);
+            t.join();
+            t.start();
         }
 
         return buffer;
