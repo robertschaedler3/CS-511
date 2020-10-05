@@ -10,6 +10,8 @@ Stevens Institute of Technology Concurrent Programming (CS 511)
 - [Mutual Exclusion](/notes/02mutual-exclusion.md) (MEP/Peterson's Algorithm/Dekker's algorithm)
 - [Complex Atomic Actions](/notes/03complex-atomic-options.md) (test and set)
 - [Semaphores I](/notes/04semaphores-1.md) (aquire and release)
+- [Semaphores II](/notes/05semaphores-2.md) (producers and consumers)
+- [Semaphores II](/notes/monitors-2.md) (using monitors)
 <!-- - [NAME](/notes/file.md) (description) -->
 
 ## Excercie Booklets
