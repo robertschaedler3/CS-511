@@ -70,7 +70,8 @@ public class Customer implements Runnable {
      * Return a string representation of the customer
      */
     public String toString() {
-        return String.format("Customer %10s : Cart=%-33s  shopTime=%-3s  checkoutTime=%-3s", hashCode(), Arrays.toString(shoppingCart.toArray()), shopTime, checkoutTime);
+        return String.format("Customer %10s : Cart=%-33s  shopTime=%-3s  checkoutTime=%-3s", hashCode(),
+                Arrays.toString(shoppingCart.toArray()), shopTime, checkoutTime);
     }
 
     /**
