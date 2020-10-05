@@ -11,7 +11,7 @@ Stevens Institute of Technology Concurrent Programming (CS 511)
 - [Complex Atomic Actions](/notes/03complex-atomic-options.md) (test and set)
 - [Semaphores I](/notes/04semaphores-1.md) (aquire and release)
 - [Semaphores II](/notes/05semaphores-2.md) (producers and consumers)
-- [Semaphores II](/notes/monitors-2.md) (using monitors)
+- [Monitors](/notes/06_monitors.md) (using monitors)
 <!-- - [NAME](/notes/file.md) (description) -->
 
 ## Excercie Booklets
