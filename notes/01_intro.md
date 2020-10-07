@@ -20,7 +20,7 @@ The study of systems of interacting computer programs whichshare resources and r
 
 Number of interleavings is exponential in the number ofinstructions. If *P* has *m* instructions and *Q* has *n* instructions, then there are
 
-> <img src="./img/01intro/interleavings.png" style="width:200px;">
+> <img src="./img/01_intro/interleavings.png" style="width:200px;">
 
 A **Transition System** *A* is a tuple (*S*, &#8594;, *I*) where *S* is the set of states, &#8594; &#8838; *S* x *S* is a transition relation, and *I* &#8838; is the set of initial states. 
 
