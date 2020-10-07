@@ -6,11 +6,11 @@ Stevens Institute of Technology Concurrent Programming (CS 511)
 
 ## Notes
 
-- [Intro to Concurrency](/notes/01intro.md) (interleavings/transition systems)
-- [Mutual Exclusion](/notes/02mutual-exclusion.md) (MEP/Peterson's Algorithm/Dekker's algorithm)
-- [Complex Atomic Actions](/notes/03complex-atomic-options.md) (test and set)
-- [Semaphores I](/notes/04semaphores-1.md) (aquire and release)
-- [Semaphores II](/notes/05semaphores-2.md) (producers and consumers)
+- [Intro to Concurrency](/notes/01_intro.md) (interleavings/transition systems)
+- [Mutual Exclusion](/notes/02_mutual-exclusion.md) (MEP/Peterson's Algorithm/Dekker's algorithm)
+- [Complex Atomic Actions](/notes/03_complex-atomic-options.md) (test and set)
+- [Semaphores I](/notes/04_semaphores-1.md) (aquire and release)
+- [Semaphores II](/notes/05_semaphores-2.md) (producers and consumers)
 - [Monitors](/notes/06_monitors.md) (using monitors)
 <!-- - [NAME](/notes/file.md) (description) -->
 
