@@ -21,6 +21,7 @@ Stevens Institute of Technology Concurrent Programming (CS 511)
 - *Exercise Booklet 3 (Complex Atomic Actions) skipped*
 - [Exercise Booklet 4](/exercises/eb4.pdf) (Semaphores)
 - [Exercise Booklet 5](/exercises/eb5.pdf) (Semaphores cont.)
+- [Exercise Booklet 6](/exercises/eb6.pdf) (Monitors)
 <!-- - [Exercise Booklet #](/exercises/eb.pdf) (TITLE) -->
 
 <!-- ## Slides
