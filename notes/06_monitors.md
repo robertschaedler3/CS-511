@@ -51,30 +51,72 @@ Apart from the lock, there are `conditional variables` associated with the monit
   - `Cond.empty()`: checks if waiting queue ofCondis empty or not
 - A queue of blocked processes
 
-## Example: Buffer of Size 1
+> **Example: Buffer of Size 1**
+> 
+> ```java
+> class Buffer {
+>     
+>     private Object buffer = null; // shared buffer
+>     private Condition full;       // wait until space available
+>     private Condition empty;      // wait until buffer available
+>     
+>     public synchronized Object consume() {
+>         while (buffer == null)
+>             full.wait();
+>         Object aux = buffer;
+>         buffer = null;
+>         empty.notify();
+>         return aux;
+>     }
+>     
+>     public synchronized void produce(Object o) {
+>         while (buffer != null)
+>             empty.wait();
+>         buffer = o;
+>         full.notify();
+>     }
+>         
+> }
+> ```
 
-```java
-class Buffer {
-    
-    private Object buffer = null; // shared buffer
-    private Condition full;       // wait until space available
-    private Condition empty;      // wait until buffer available
-    
-    public synchronized Object consume() {
-        while (buffer == null)
-            full.wait();
-        Object aux = buffer;
-        buffer = null;
-        empty.notify();
-        return aux;
-    }
-    
-    public synchronized void produce(Object o) {
-        while (buffer  != null)
-            empty.wait();
-        buffer = o;
-        full.notify();
-    }
-        
-}
-```
+## Wait
+
+Blocks the process currently executing and associates it with a variable’s queue. Upon blocking, it frees the `lock` allowing the entry of other processes.
+
+## Notify
+
+Two strategies:
+- Notify and Urgent Wait: `E < N < W` (classical monitors)
+- Notify and Continue: `E = W < N` (Java ⇐ We focus on this one)
+
+where the letters denote the precedence of:
+- `N`: notifying processes
+- `W`: waiting processes 
+- `E`: processes blocked on entry
+
+> **Example: Monitor that Defines a Semaphore**
+> 
+> ```java
+> class Semaphore {
+> 
+>     private Condition nonZero;
+>     private int permissions;
+>     
+>     public Semaphore(int n) {
+>         this.permissions = n;
+>     }
+>     
+>     public synchronized void acquire() {
+>         while (permissions == 0)
+>             nonZero.wait ();
+>         permissions--;
+>     }
+>     
+>     public synchronized void release() {
+>         permissions++;
+>         nonZero.notifyAll();
+>     }
+>     
+> }
+> ```
+
