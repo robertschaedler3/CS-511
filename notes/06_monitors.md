@@ -28,14 +28,14 @@ class Counter {
 
 With Monitors:
 ```java
-class Counter {
+monitor Counter {
     private cnt = 0;
 
-    public synchronized void inc() {
+    public void inc() {
         cnt++;
     }
 
-    public synchronized void dec() {
+    public void dec() {
         cnt--;
     }
 }
@@ -54,13 +54,13 @@ Apart from the lock, there are `conditional variables` associated with the monit
 > **Example: Buffer of Size 1**
 > 
 > ```java
-> class Buffer {
+> monitor Buffer {
 >     
 >     private Object buffer = null; // shared buffer
 >     private Condition full;       // wait until space available
 >     private Condition empty;      // wait until buffer available
 >     
->     public synchronized Object consume() {
+>     public Object consume() {
 >         while (buffer == null)
 >             full.wait();
 >         Object aux = buffer;
@@ -69,7 +69,7 @@ Apart from the lock, there are `conditional variables` associated with the monit
 >         return aux;
 >     }
 >     
->     public synchronized void produce(Object o) {
+>     public void produce(Object o) {
 >         while (buffer != null)
 >             empty.wait();
 >         buffer = o;
@@ -97,7 +97,7 @@ where the letters denote the precedence of:
 > **Example: Monitor that Defines a Semaphore**
 > 
 > ```java
-> class Semaphore {
+> monitor Semaphore {
 > 
 >     private Condition nonZero;
 >     private int permissions;
@@ -106,13 +106,13 @@ where the letters denote the precedence of:
 >         this.permissions = n;
 >     }
 >     
->     public synchronized void acquire() {
+>     public void acquire() {
 >         while (permissions == 0)
 >             nonZero.wait ();
 >         permissions--;
 >     }
 >     
->     public synchronized void release() {
+>     public void release() {
 >         permissions++;
 >         nonZero.notifyAll();
 >     }
@@ -120,3 +120,110 @@ where the letters denote the precedence of:
 > }
 > ```
 
+## Readers/Writers 
+
+```java
+monitor RW {
+
+    int readers, writers = 0;
+    Condition okToRead, okToWrite;
+
+    public void StartRead() {
+        while (writers != 0 || !okToWrite.empty()) {
+            okToRead.wait();
+        }
+        readers++;
+    }
+
+    public void EndRead() {
+        readers--;
+        if (readers == 0) {
+            okToWrite.notify();
+        }
+    }
+
+    public void StartWrite() {
+        while (writers != 0 || reader != 0) {
+            okToWrite.wait();
+        }
+        writers = 1;
+    }
+
+    public void EndWrite() {
+        writers = 0;
+        okToWrite.signal();
+        okToRead.signalAll();
+    }
+}
+```
+
+Upholds the readers-writers invariant, however it gives priority to readers over writers becasue:
+- new readers can enter the moniotr without waiting as long as a reader is active
+- waiting writers have to wait until the last reader calls `endRead` and signals `okToWrite`
+- as long as readers keep arriving and queuing for entering the monitor, the waiting writers will never execute.
+
+### Fair Solution for Writers:
+
+The problems above can be resolved by checking if there are waiting writers. *Creating a solution without deadlock that is fair for both readers and writers is particularly difficult*.
+
+```java
+monitor RW {
+
+    int readers, writers, writersWaiting = 0;
+    Condition okToRead, okToWrite;
+
+    public void StartRead() {
+        // Check for waiting writers
+        while (writers != 0 || writersWaiting != 0) {
+            okToRead.wait();
+        }
+        readers++;
+    }
+
+    public void EndRead() {
+        readers--;
+        if (readers == 0) {
+            okToWrite.notify();
+        }
+    }
+
+    public void StartWrite() {
+        while (writers != 0 || reader != 0) {
+            writersWaiting++;
+            okToWrite.wait();
+            writersWaiting--;
+        }
+        writers = 1;
+    }
+
+    public void EndWrite() {
+        writers = 0;
+        okToWrite.signal();
+        okToRead.signalAll();
+    }
+}
+```
+
+## Barrier Synchonization
+
+Creates a *one-time-use* barrier for synchronizing threads such that *N* threads must reach the barrier before they can continue.
+
+```java
+monitor Barrier {
+
+    final int N = 3;
+    int count = 0;
+    Condition readyToPass;
+
+    public void pass() {
+        if (c < N) {
+            count++;
+            while(count < N) {
+                readyToPass.wait()
+            }
+            readyToPass.signal();
+        }
+    }
+
+}
+```
