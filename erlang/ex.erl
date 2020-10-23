@@ -1,4 +1,4 @@
--module(intro).
+-module(ex).
 -author("R.S.").
 -compile(export_all).
 
@@ -42,16 +42,20 @@ mirror({node, D, LT, RT}) ->
 
 %% Exercise: implement pre-order traversal
 %% For example:
-%% ex:pre(t()). 
+%% ex:pre(ex:t()). 
 %% [12, 7, 24, 18]
 
 pre({empty}) -> 
     [];
-pre({node, D, {empty}, {empty}}) -> 
-    D;
-pre({node, D, LT, {empty}}) -> 
-    [D, pre(LT)];
-pre({node, D, {empty}, RT}) -> 
-    [D, pre(RT)];
 pre({node, D, LT, RT}) ->
-    [D | [pre(LT) | pre(RT)] ].
+    [D | pre(LT) ++ pre(RT) ].
+
+mapl(_F, []) ->
+    [];
+mapl(F, [H | T]) -> 
+    [ F(H) | mapl(F, T)].
+
+foldr(_F, A, []) -> 
+    A;
+foldr(F, A, [H | T]) -> 
+    F(H, foldr(F, A, T)).
