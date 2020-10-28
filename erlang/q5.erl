@@ -15,7 +15,21 @@ t2() ->
      {node,3,{empty},
       {node,3,{empty},{empty}}}}.
 
+all_empty(Q) -> 
+    case queue:is_empty(Q) of
+        true -> true;
+        _ -> case queue:out(Q) of 
+            {{value, {empty}}, Q2} -> all_empty(Q2);
+            _ -> false
+        end
+    end.
 
+ic_helper(Q) ->
+    {{value, T}, Q2} = queue:out(Q),
+    case T of
+        {empty} -> all_empty(Q2);
+        {node,_,LT,RT} -> ic_helper(queue:in(RT, queue:in(LT, Q2)))
+    end.
 
 -spec ic(btree()) -> boolean().
 ic(T) ->
