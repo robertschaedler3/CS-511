@@ -12,7 +12,7 @@ Stevens Institute of Technology Concurrent Programming (CS 511)
 - [Semaphores I](/notes/04_semaphores-1.md) (aquire and release)
 - [Semaphores II](/notes/05_semaphores-2.md) (producers and consumers)
 - [Monitors](/notes/06_monitors.md) (using monitors)
-- [Erlang](/notes/07_erlang.md) (intro to erlang)
+- [Erlang](/notes/07_message_passing.md) (message passing)
 <!-- - [NAME](/notes/file.md) (description) -->
 
 ## Excercie Booklets
