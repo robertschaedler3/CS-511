@@ -64,6 +64,13 @@ print_state(Shipping_State) ->
     io:format("--Ports--~n"),
     _ = print_ports(Shipping_State#shipping_state.ports, Shipping_State#shipping_state.port_inventory).
 
+
+%% helper function for print_ships
+get_port_helper([], _Port_ID) -> error;
+get_port_helper([ Port = #port{id = Port_ID} | _ ], Port_ID) -> Port;
+get_port_helper( [_ | Other_Ports ], Port_ID) -> get_port_helper(Other_Ports, Port_ID).
+
+
 print_ships(Ships, Locations, Inventory, Ports) ->
     case Ships of
         [] ->
@@ -90,7 +97,7 @@ print_ports(Ports, Inventory) ->
     end.
 %% This functions sets up an initial state for this shipping simulation. You can add, remove, or modidfy any of this content. This is provided to you to save some time.
 %% @returns {ok, shipping_state} where shipping_state is a shipping_state record with all the initial content.
-init() ->
+shipco() ->
     Ships = [#ship{id=1,name="Santa Maria",container_cap=20},
               #ship{id=2,name="Nina",container_cap=20},
               #ship{id=3,name="Pinta",container_cap=20},
