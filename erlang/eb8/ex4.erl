@@ -2,20 +2,19 @@
 
 -compile(export_all).
 
-start(N, Interval) ->
+start(N, Frequency) ->
     Clients = [spawn(?MODULE, client, []) || _ <- lists:seq(1, N)],
-    spawn(?MODULE, timer, [Interval, Clients, 0]),
+    spawn(?MODULE, timer, [Frequency, Clients, 0]),
     ok.
 
 client() ->
     receive
         {tick, T} ->
-            io:format("~p tick recieved ~w~n", [self(), T]),
+            io:format("~p ~wms~n", [self(), T]),
             client()
     end.
 
-timer(Interval, Clients, Time) ->
-    timer:sleep(Interval),
-    lists:foreach(fun (C) -> C ! {tick, Time + Interval} end,
-                  Clients),
-    timer(Interval, Clients, Time + Interval).
+timer(Frequency, Clients, Time) ->
+    timer:sleep(Frequency),
+    [ C ! {tick, Time + Frequency} || C <- Clients],
+    timer(Frequency, Clients, Time + Frequency).
