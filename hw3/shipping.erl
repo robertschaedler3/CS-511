@@ -3,48 +3,141 @@
 -include_lib("./shipping.hrl").
 
 get_ship(Shipping_State, Ship_ID) ->
-    io:format("Implement me!!"),
-    error.
+    case lists:keysearch(Ship_ID, #ship.id, Shipping_State#shipping_state.ships) of
+        {value, Ship} -> Ship;
+        _ -> error
+    end.
 
 get_container(Shipping_State, Container_ID) ->
-    io:format("Implement me!!"),
-    error.
+    case lists:keysearch(Container_ID, #container.id, Shipping_State#shipping_state.containers) of
+        {value, Container} -> Container;
+        _ -> error
+    end.
 
 get_port(Shipping_State, Port_ID) ->
-    io:format("Implement me!!"),
-    error.
+    case lists:keysearch(Port_ID, #port.id, Shipping_State#shipping_state.ports) of
+        {value, Port} -> Port;
+        _ -> error
+    end.
 
 get_occupied_docks(Shipping_State, Port_ID) ->
-    io:format("Implement me!!"),
-    error.
+    [ Dock || {Port, Dock, _} <- Shipping_State#shipping_state.ship_locations, (Port == Port_ID)].
 
 get_ship_location(Shipping_State, Ship_ID) ->
-    io:format("Implement me!!"),
-    error.
+    case lists:keyfind(Ship_ID, 3, Shipping_State#shipping_state.ship_locations) of
+        {Port_ID, Dock_ID, _} -> {Port_ID, Dock_ID};
+        _ -> error
+    end.
+
+get_container_weight_helper(Shipping_State, Container_ID) ->
+    case lists:keysearch(Container_ID, #container.id, Shipping_State#shipping_state.containers) of
+        {value, Container} -> Container#container.weight;
+        _ -> error
+    end.
 
 get_container_weight(Shipping_State, Container_IDs) ->
-    io:format("Implement me!!"),
-    error.
-
+    Weights = [ get_container_weight_helper(Shipping_State, Container_ID) || Container_ID <- Container_IDs ],
+    case lists:any(fun (E) -> E == error end, Weights ) of
+        true -> error;
+        false -> lists:sum(Weights)
+    end.
+    
 get_ship_weight(Shipping_State, Ship_ID) ->
-    io:format("Implement me!!"),
-    error.
+    case maps:get(Ship_ID, Shipping_State#shipping_state.ship_inventory, error) of
+        error -> error;
+        Container_IDs -> get_container_weight(Shipping_State, Container_IDs)
+    end.
 
 load_ship(Shipping_State, Ship_ID, Container_IDs) ->
-    io:format("Implement me!!"),
-    error.
+    Ship = get_ship(Shipping_State, Ship_ID),
+    case Ship of
+        error -> error;
+        _ ->
+            Inventory = maps:get(Ship_ID, Shipping_State#shipping_state.ship_inventory),
+            case length(Inventory ++ Container_IDs) > Ship#ship.container_cap of
+                true -> error;
+                false ->
+                    % Make sure all containers are on same port
+                    case lists:foldl(fun(X, Res) -> X or Res end, false, lists:map(fun(A) -> Container_IDs -- A == [] end, maps:values(Shipping_State#shipping_state.port_inventory))) of
+                        false -> error;
+                        _ ->
+                            New_Port_Inventory = maps:map(fun(_K, V) -> V -- Container_IDs end, Shipping_State#shipping_state.port_inventory),
+                            New_Ship_Inventory = maps:put(Ship_ID, Inventory ++ Container_IDs, Shipping_State#shipping_state.ship_inventory),
+                            Shipping_State#shipping_state {
+                                ship_inventory = New_Ship_Inventory,
+                                port_inventory = New_Port_Inventory
+                            }
+                    end
+            end
+    end.
 
 unload_ship_all(Shipping_State, Ship_ID) ->
-    io:format("Implement me!!"),
-    error.
+    case get_ship(Shipping_State, Ship_ID) of
+        error -> error;
+        _ ->
+            {Port_ID, _} = get_ship_location(Shipping_State, Ship_ID),
+            case Port_ID of
+                error -> error;
+                _ ->
+                    Port = get_port(Shipping_State, Port_ID),
+                    Port_Inventory = maps:get(Port_ID, Shipping_State#shipping_state.port_inventory),
+                    Ship_Inventory = maps:get(Ship_ID, Shipping_State#shipping_state.ship_inventory),
+                    case length(Port_Inventory ++ Ship_Inventory) > Port#port.container_cap of
+                        true -> error;
+                        false ->
+                            New_Port_Inventory = maps:put(Port_ID, Port_Inventory ++ Ship_Inventory, Shipping_State#shipping_state.port_inventory),
+                            New_Ship_Inventory = maps:put(Ship_ID, [], Shipping_State#shipping_state.ship_inventory),
+                            Shipping_State#shipping_state {
+                                ship_inventory = New_Ship_Inventory,
+                                port_inventory = New_Port_Inventory
+                            }
+                    end
+            end
+    end.
 
 unload_ship(Shipping_State, Ship_ID, Container_IDs) ->
-    io:format("Implement me!!"),
-    error.
+    case get_ship(Shipping_State, Ship_ID) of
+        error -> error;
+        _ ->
+            {Port_ID, _} = get_ship_location(Shipping_State, Ship_ID),
+            case Port_ID of
+                error -> error;
+                _ ->
+                    Port = get_port(Shipping_State, Port_ID),
+                    Ship_Inventory = maps:get(Ship_ID, Shipping_State#shipping_state.ship_inventory),
+                    Port_Inventory = maps:get(Port_ID, Shipping_State#shipping_state.port_inventory),
+                    case length(Port_Inventory ++ Ship_Inventory) > Port#port.container_cap of
+                        true -> error;
+                        false ->
+                            case Container_IDs -- Ship_Inventory == [] of
+                                false -> error;
+                                _ ->
+                                    New_Ship_Inventory = maps:put(Ship_ID, [], Shipping_State#shipping_state.ship_inventory),
+                                    New_Port_Inventory = maps:put(Port_ID, Port_Inventory ++ Ship_Inventory, Shipping_State#shipping_state.port_inventory),
+                                    Shipping_State#shipping_state {
+                                        ship_inventory = New_Ship_Inventory,
+                                        port_inventory = New_Port_Inventory
+                                    }
+                            end
+                    end
+            end
+    end.
+
 
 set_sail(Shipping_State, Ship_ID, {Port_ID, Dock}) ->
-    io:format("Implement me!!"),
-    error.
+    Port = get_port(Shipping_State, Port_ID),
+    case Port of
+        error -> error;
+        _ ->
+            case [{P, D, S} || {P, D, S} <- Shipping_State#shipping_state.ship_locations, S /= Ship_ID, {P, D} == {Port_ID, Dock}] /= [] of
+                true -> error;
+                false ->
+                    Current_Location = [{P, D, S} || {P, D, S} <- Shipping_State#shipping_state.ship_locations, S == Ship_ID],
+                    Shipping_State#shipping_state {
+                        ship_locations = (Shipping_State#shipping_state.ship_locations -- Current_Location) ++ {Port_ID, Dock, Ship_ID}
+                    }
+            end
+    end.
 
 
 
