@@ -2,26 +2,42 @@
 
 -compile(export_all).
 
-start(N) ->
-    Serverlets = [spawn(?MODULE, server, [""]) || _ <- lists:seq(1, N)],
-    [spawn(?MODULE, client, [S]) || S <- Serverlets],
+start() ->
+    S = spawn(?MODULE, server, []),
+    [spawn(?MODULE, client, [S]) || _ <- lists:seq(1, 10)],
     ok.
 
 client(S) ->
     S ! {start, self()},
-    S ! {add, "h", self()},
-    S ! {add, "e", self()},
-    S ! {add, "l", self()},
-    S ! {add, "l", self()},
-    S ! {add, "o", self()},
-    S ! {done, self()},
-    receive
-        {S, Str} -> io:format("serverlet ~p | client ~p | msg ~s~n", [S, self(), Str])
+    receive 
+        {Serverlet, ok} -> 
+            Serverlet ! {add, "h", self()},
+            Serverlet ! {add, "e", self()},
+            Serverlet ! {add, "l", self()},
+            Serverlet ! {add, "l", self()},
+            Serverlet ! {add, "o", self()},
+            Serverlet ! {done, self()},
+            receive
+                {Serverlet, Str} -> io:format("serverlet ~p | client ~p | msg '~s'~n", [Serverlet, self(), Str])
+            end
     end.
 
-server(Str) -> 
+server() -> 
     receive
-        {add, Str_Msg, _C} -> server(Str ++ Str_Msg);
-        {done, C} -> C ! {self(), Str}
+        {start, C_PID} -> 
+            C_PID ! {spawn(?MODULE, serverlet, [C_PID, ""]), ok},
+            server()
     end.
 
+serverlet(C_PID, State) -> 
+    receive
+        {add, Str, C_PID} -> serverlet(C_PID, State ++ Str);
+        {done, C_PID} -> 
+            C_PID ! {self(), State},
+            serverlet(C_PID, State)
+    end.
+        
+%% If multiple clients want to use the service, 
+%% all messages will be waiting in the server's mailbox.
+
+%% Use serverlets to create concat servers for each new client.
