@@ -2,15 +2,16 @@
 
 -compile(export_all).
 
-start() -> spawn(fun server/0).
+start() -> 
+    S = spawn(fun server/0),
+    [ spawn(?MODULE, client, [S]) || _ <- lists:seq(1,10) ].
 
-start_clients(S, N) -> [spawn(?MODULE, client, [S]) || _ <- lists:seq(1, N)].
 
 server() -> 
     receive
-        {From, Ref, start} -> 
+        {From, start} -> 
             Serverlet = spawn(?MODULE, serverlet, [rand:uniform(10)]),
-            From ! {Serverlet, Ref, ok},
+            From ! {Serverlet, make_ref(), ok},
             server()
     end.
 
@@ -24,16 +25,14 @@ serverlet(Number) ->
     end.
 
 client(S) -> 
-    Ref = make_ref(),
-    S ! {self(), Ref, start},
-    receive {Serverlet, Ref, ok} -> play(Serverlet) end.
+    S ! {self(), start},
+    receive {Serverlet, Ref, ok} -> play(Serverlet, Ref) end.
     
-play(S) ->
-    Ref = make_ref(),
+play(S, Ref) ->
     Guess = rand:uniform(10),
-    io:format("~p | guess ~w~n", [self(), Guess]),
+    io:format("serverlet ~p | client ~p | guess ~w~n", [S, self(), Guess]),
     S ! {self(), Ref, Guess},
     receive 
-        {Ref, tryAgain} -> io:format("~p | incorrect~n", [self()]), play(S);
-        {Ref, gotIt} -> io:format("~p | got it~n", [self()])
+        {Ref, tryAgain} -> io:format("serverlet ~p | client ~p | try again~n", [S, self()]), play(S, Ref);
+        {Ref, gotIt} -> io:format("serverlet ~p | client ~p | got it~n", [S, self()])
     end.
