@@ -1,25 +1,24 @@
 -module(fs).
+
 -compile(export_all).
 
-fact(0)->
-    1;
-fact(N) ->
-    fact(N) * fact(N - 1).
+fact(0) -> 1;
+fact(N) -> N * fact(N - 1).
 
-start(N) -> 
+start(N) ->
     S = spawn(?MODULE, server, []),
-    [ spawn(?MODULE, client, [S, N]) || _ <- lists:seq(1,N) ],
+    [spawn(?MODULE, client, [S, X]) || X <- lists:seq(1, N)],
     ok.
 
 server() ->
-    receive 
-        {From, req, N} -> 
-            From!{self(), repl, fact(N)},
+    receive
+        {From, req, N} ->
+            From ! {self(), repl, fact(N)},
             server()
     end.
 
-client(S, N) ->
-    S!{self(), req, N},
+client(S, X) ->
+    S ! {self(), req, X},
     receive
-        {_, repl, F} -> io:format("~w~s", F)
+        {_, repl, F} -> io:format("~p fact(~w) = ~w~n", [self(), X, F])
     end.
